@@ -7,11 +7,15 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sensor_data_collect.FilesUtil;
 import com.sensor_data_collect.PermisionUtils;
+
+import java.sql.BatchUpdateException;
 
 public class MainActivity extends AppCompatActivity {
     private SensorManager mSensorManager;
@@ -19,8 +23,20 @@ public class MainActivity extends AppCompatActivity {
     private TextView x_acc;
     private TextView y_acc;
     private TextView z_acc;
+    private TextView sum_acc;
+    private Button start_collect;
+    private Button stop_collect;
+    private Button change_collect_pattern;
+//    Ture 为三维 FALSE为合加速度
+    Boolean pattern = Boolean.TRUE;
+    Boolean is_writing = Boolean.FALSE;
+
+
     String filePath = "/sdcard/";
     String fileName = "sensor_data.txt";
+    float a_x ;   // 获取x轴的加速度
+    float a_y ;   // 获取y轴的加速度
+    float a_z ;   // 获取z轴的加速度
 //    private final
 
     @Override
@@ -34,13 +50,47 @@ public class MainActivity extends AppCompatActivity {
         x_acc = (TextView)findViewById(R.id.x_acc_text);
         y_acc = (TextView)findViewById(R.id.y_acc_text);
         z_acc = (TextView)findViewById(R.id.z_acc_text);
+        sum_acc = (TextView)findViewById(R.id.sum_acc);
+        start_collect = (Button)findViewById(R.id.start_collect);
+        stop_collect = (Button)findViewById(R.id.stop_collect);
+        change_collect_pattern = (Button)findViewById(R.id.pattern_change);
 
+
+        start_collect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (!is_writing){
+                    is_writing = !is_writing;
+                }
+                Toast.makeText(MainActivity.this, "start", Toast.LENGTH_SHORT).show();
+            }
+        });
+        stop_collect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (is_writing){
+                    is_writing = !is_writing;
+                }
+                Toast.makeText(MainActivity.this, "stop", Toast.LENGTH_SHORT).show();
+            }
+        });
+        change_collect_pattern.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                pattern = !pattern;
+                Toast.makeText(MainActivity.this, "pattern changed", Toast.LENGTH_SHORT).show();
+                if (pattern){
+                    change_collect_pattern.setText("三维加速度");
+                }else {
+                    change_collect_pattern.setText("合加速度");
+                }
+            }
+        });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         mSensorManager.registerListener(sensorEventListener, mSensor, 1000000);
 //                registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
@@ -55,21 +105,29 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint({"SetTextI18n", "ShowToast"})
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
-            float a_x = sensorEvent.values[0];   // 获取x轴的加速度
-            float a_y = sensorEvent.values[1];   // 获取y轴的加速度
-            float a_z = sensorEvent.values[2];   // 获取z轴的加速度
-            x_acc.setText("获取x轴的加速度:" + a_x);
-            y_acc.setText("获取y轴的加速度:" + a_y);
-            z_acc.setText("获取z轴的加速度:" + a_z);
-            String write2file = Math.sqrt(a_x*a_x + a_y*a_y + a_z*a_z ) + "\n";
-//            String write2file = a_x + "\t" + a_y + "\t" + a_z + "\t" + "\n";
-            FilesUtil writer = new FilesUtil();
-            writer.initData(write2file);
-            Toast.makeText(MainActivity.this, write2file, Toast.LENGTH_SHORT);
+            a_x = sensorEvent.values[0];   // 获取x轴的加速度
+            a_y = sensorEvent.values[1];   // 获取y轴的加速度
+            a_z = sensorEvent.values[2];   // 获取z轴的加速度
+            x_acc.setText("x轴加速度:" + a_x);
+            y_acc.setText("y轴加速度:" + a_y);
+            z_acc.setText("z轴加速度:" + a_z);
+            String sum_acc_temp = Math.sqrt(a_x*a_x + a_y*a_y + a_z*a_z ) + "";
+            sum_acc.setText("合加速度:" + sum_acc_temp);
+            String write2file;
+            if (is_writing){
+                if (!pattern){
+                    write2file = Math.sqrt(a_x*a_x + a_y*a_y + a_z*a_z ) + "\n";
+                }else {
+                    write2file = a_x + "\t" + a_y + "\t" + a_z + "\t" + "\n";
+                }
+                FilesUtil writer = new FilesUtil();
+                writer.initData(write2file);
+            }
+//            Toast.makeText(MainActivity.this, "onSensorChanged", Toast.LENGTH_SHORT).show();
         }
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) {
-            Toast.makeText(MainActivity.this, "master", Toast.LENGTH_SHORT);
+            Toast.makeText(MainActivity.this, "onAccuracyChanged", Toast.LENGTH_SHORT).show();
         }
     };
 

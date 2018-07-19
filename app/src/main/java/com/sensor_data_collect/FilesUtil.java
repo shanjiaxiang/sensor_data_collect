@@ -14,7 +14,8 @@ public class FilesUtil {
         String mPath = sd.getPath() + "/sensor_datas/";
         Log.d("filePath",mPath);
         System.out.print(mPath);
-        String mFile = "sensor_datas.txt";
+        long curTime = System.currentTimeMillis();
+        String mFile = curTime + ".txt";
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             writeTxtToFile(content, mPath, mFile);
         } else {
