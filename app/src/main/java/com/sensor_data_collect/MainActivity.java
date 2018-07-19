@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         }
         @Override
         public void onAccuracyChanged(Sensor sensor, int i) {
-
+            Toast.makeText(MainActivity.this, "hotfix", Toast.LENGTH_SHORT);
         }
     };
 
