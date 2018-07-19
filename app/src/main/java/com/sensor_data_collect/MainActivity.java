@@ -28,8 +28,9 @@ public class MainActivity extends AppCompatActivity {
     private Button stop_collect;
     private Button change_collect_pattern;
 //    Ture 为三维 FALSE为合加速度
-    Boolean pattern = Boolean.TRUE;
+    public static Boolean pattern = Boolean.TRUE;
     Boolean is_writing = Boolean.FALSE;
+    long curTime;
 
 
     String filePath = "/sdcard/";
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!is_writing){
                     is_writing = !is_writing;
                 }
+                curTime = System.currentTimeMillis();
                 Toast.makeText(MainActivity.this, "start", Toast.LENGTH_SHORT).show();
             }
         });
@@ -91,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(sensorEventListener, mSensor, 1000000);
+        mSensorManager.registerListener(sensorEventListener, mSensor, 20000);
 //                registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
@@ -121,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
                     write2file = a_x + "\t" + a_y + "\t" + a_z + "\t" + "\n";
                 }
                 FilesUtil writer = new FilesUtil();
-                writer.initData(write2file);
+                writer.initData(write2file, curTime);
             }
 //            Toast.makeText(MainActivity.this, "onSensorChanged", Toast.LENGTH_SHORT).show();
         }

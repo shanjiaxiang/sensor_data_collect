@@ -6,17 +6,22 @@ import android.widget.Toast;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import com.sensor_data_collect.MainActivity;
 
 public class FilesUtil {
 
-    public void initData(String content) {
+    public void initData(String content, long curTime) {
         File sd = Environment.getExternalStorageDirectory();
         String mPath = sd.getPath() + "/sensor_datas/";
         Log.d("filePath",mPath);
-        System.out.print(mPath);
-        long curTime = System.currentTimeMillis();
-        String mFile = curTime + ".txt";
+
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            String mFile;
+            if (MainActivity.pattern){
+                mFile = curTime + "_3Dim" + ".txt";
+            }else {
+                mFile = curTime + "_Sum" + ".txt";
+            }
             writeTxtToFile(content, mPath, mFile);
         } else {
             Log.e("error","file write error");
@@ -30,7 +35,6 @@ public class FilesUtil {
         makeFilePath(filePath, fileName);
 
         String strFilePath = filePath+fileName;
-        // 每次写入时，都换行写
         try {
             File file = new File(strFilePath);
             if (!file.exists()) {
